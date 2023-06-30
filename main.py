@@ -53,13 +53,13 @@ def handle_text(message):
             faculty_stat = db.get_all_points()
             db.close()
             answer = (
-                f"Факультет *{faculty}* получает `{choose_noun_case(score)}`. "
+                f"Факультет *{faculty}* получает `{choose_noun_case(score)}` "
                 "\N{party popper}\n\nСтатистика по факультетам "
                 "на данный момент:\n\n"
             )
             answer_stat = "\n".join(
                 [
-                    f"*{faculty}*: `{choose_noun_case(score)}` бал."
+                    f"*{faculty}*: `{choose_noun_case(score)}`"
                     for faculty, score in faculty_stat
                 ]
             )
