@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 from db import DataBase
 
+from language_utilities import choose_noun_case
+
 load_dotenv()
 ADMIN_ID = os.environ.get("ADMIN_ID")
 START_WORLD = "факульт"
@@ -51,13 +53,13 @@ def handle_text(message):
             faculty_stat = db.get_all_points()
             db.close()
             answer = (
-                f"Факультет *{faculty}* получает `{score}` бал. "
+                f"Факультет *{faculty}* получает `{choose_noun_case(score)}`. "
                 "\N{party popper}\n\nСтатистика по факультетам "
                 "на данный момент:\n\n"
             )
             answer_stat = "\n".join(
                 [
-                    f"*{faculty}*: `{score}` бал."
+                    f"*{faculty}*: `{choose_noun_case(score)}` бал."
                     for faculty, score in faculty_stat
                 ]
             )
