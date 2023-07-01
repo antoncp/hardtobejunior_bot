@@ -67,7 +67,7 @@ def handle_text(message) -> None:
 
 
 def new_score_record(faculty: str, score: int) -> str:
-    """Handles answer of the bot on start command."""
+    """Adds new scores record to the database."""
     db = DataBase()
     db.save_points(faculty, score)
     db.close()
@@ -79,6 +79,7 @@ def new_score_record(faculty: str, score: int) -> str:
 
 
 def read_records() -> str:
+    """Fetch all scores statistic from the database."""
     db = DataBase()
     faculty_stat = db.get_all_points()
     db.close()
