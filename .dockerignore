@@ -1,0 +1,11 @@
+.env
+.venv
+env/
+venv/
+ENV/
+db/
+*.sqlite3
+*.sqlite
+env.bak/
+venv.bak/
+__pycache__/

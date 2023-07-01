@@ -1,4 +1,5 @@
 def choose_noun_case(score, word='балл'):
+    """Provides correct endings for words, based on number"""
     ending = ''
     remainder = score % 10
     if (remainder >= 5 or remainder == 0 or
@@ -7,4 +8,3 @@ def choose_noun_case(score, word='балл'):
     elif 1 < remainder < 5:
         ending = 'a'
     return f'{score} {word}{ending}'
-
