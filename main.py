@@ -41,8 +41,8 @@ def handle_text(message) -> None:
     """
     if (
         message.from_user.id == int(ADMIN_ID)
-        and START_WORLD in message.text.lower()
-    ):
+        or message.from_user.id == int(INSPECT_ID)
+    ) and START_WORLD in message.text.lower():
         score = [_ for _ in message.text if _.isdigit()]
         if score:
             score = int("".join(score))
@@ -54,7 +54,7 @@ def handle_text(message) -> None:
         if faculty:
             faculty = FACULTY[faculty[0][:5].lower()]
         if score and faculty:
-            answer = new_score_record(faculty, score)
+            answer = new_score_record(faculty, score, message.from_user.id)
             answer_stat = read_records()
             bot.send_message(
                 message.chat.id, answer + answer_stat, parse_mode="Markdown"
@@ -67,10 +67,13 @@ def handle_text(message) -> None:
         bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
 
 
-def new_score_record(faculty: str, score: int) -> str:
+def new_score_record(faculty: str, score: int, id: int) -> str:
     """Adds new scores record to the database."""
     db = DataBase()
-    db.save_points(faculty, score)
+    if id == int(ADMIN_ID):
+        db.save_points(faculty, score)
+    else:
+        db.test_save_points(faculty, score)
     db.close()
     answer = (
         f"Факультет *{faculty}* получает `{choose_noun_case(score)}` "
