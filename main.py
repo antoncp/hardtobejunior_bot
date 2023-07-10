@@ -63,7 +63,13 @@ def handle_text(message) -> None:
         message.from_user.id == int(ADMIN_ID)
         or message.from_user.id == int(INSPECT_ID)
     ) and message.text.lower() == "стата":
-        answer_stat = read_records()
+        answer_stat = read_records(int(ADMIN_ID))
+        bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
+    elif (
+        message.from_user.id == int(ADMIN_ID)
+        or message.from_user.id == int(INSPECT_ID)
+    ) and message.text.lower() == "тестстата":
+        answer_stat = read_records(int(INSPECT_ID))
         bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
 
 
@@ -82,10 +88,13 @@ def new_score_record(faculty: str, score: int, id: int) -> str:
     return answer
 
 
-def read_records() -> str:
+def read_records(id: int) -> str:
     """Fetch all scores statistic from the database."""
     db = DataBase()
-    faculty_stat = db.get_all_points()
+    if id == int(ADMIN_ID):
+        faculty_stat = db.get_all_points()
+    else:
+        faculty_stat = db.test_get_all_points()
     db.close()
     header = "Статистика по факультетам на данный момент:\n\n"
     answer_stat = "\n".join(
