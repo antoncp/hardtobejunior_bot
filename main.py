@@ -10,6 +10,7 @@ load_dotenv()
 ADMIN_ID = os.environ.get("ADMIN_ID")
 INSPECT_ID = os.environ.get("INSPECT_ID")
 START_WORLD = "факульт"
+REDUCT_WORLD = "минус"
 FACULTY = {
     "мобил": "Мобилпафф",
     "фулст": "Фулстекслей",
@@ -44,6 +45,7 @@ def handle_text(message) -> None:
         or message.from_user.id == int(INSPECT_ID)
     ) and START_WORLD in message.text.lower():
         score = [_ for _ in message.text if _.isdigit()]
+        minus = True if REDUCT_WORLD in message.text.lower() else False
         if score:
             score = int("".join(score))
         faculty = [
@@ -54,10 +56,10 @@ def handle_text(message) -> None:
         if faculty:
             faculty = FACULTY[faculty[0][:5].lower()]
         if score and faculty:
+            score = -score if minus else score
             answer = new_score_record(faculty, score, message.from_user.id)
-            answer_stat = read_records()
             bot.send_message(
-                message.chat.id, answer + answer_stat, parse_mode="Markdown"
+                message.chat.id, answer, parse_mode="Markdown"
             )
     elif (
         message.from_user.id == int(ADMIN_ID)
@@ -81,10 +83,16 @@ def new_score_record(faculty: str, score: int, id: int) -> str:
     else:
         db.test_save_points(faculty, score)
     db.close()
-    answer = (
-        f"Факультет *{faculty}* получает `{choose_noun_case(score)}` "
-        "\N{party popper}\n\n"
-    )
+    if score >= 0:
+        answer = (
+            f"Факультет *{faculty}* получает `{choose_noun_case(score)}` "
+            "\N{party popper}\n\n"
+        )
+    else:
+        answer = (
+            f"Факультет *{faculty}* теряет `{choose_noun_case(score)}` "
+            "\N{unamused face}\n\n"
+        )
     return answer
 
 
