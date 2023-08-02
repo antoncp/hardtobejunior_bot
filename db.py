@@ -4,8 +4,8 @@ import sqlite3
 class DataBase:
     """Class to work with SQLite database."""
 
-    def __init__(self):
-        self.connection = sqlite3.connect('db/juniors.sqlite')
+    def __init__(self, database='juniors.sqlite'):
+        self.connection = sqlite3.connect(f'db/{database}')
         self.cursor = self.connection.cursor()
 
     def create_database(self):

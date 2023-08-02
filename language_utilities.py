@@ -6,5 +6,5 @@ def choose_noun_case(score, word='балл'):
        (score > 10 and 10 < int(str(score)[-2:]) < 20)):
         ending = 'ов'
     elif 1 < remainder < 5:
-        ending = 'a'
+        ending = 'а'
     return f'{score} {word}{ending}'
