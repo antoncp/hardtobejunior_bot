@@ -85,12 +85,12 @@ def new_score_record(faculty: str, score: int, id: int) -> str:
     db.close()
     if score >= 0:
         answer = (
-            f"Факультет *{faculty}* получает `{choose_noun_case(score)}` "
+            f"Фaкультет *{faculty}* получает `{choose_noun_case(score)}` "
             "\N{party popper}\n\n"
         )
     else:
         answer = (
-            f"Факультет *{faculty}* теряет `{choose_noun_case(score)}` "
+            f"Фaкультет *{faculty}* теряет `{choose_noun_case(score)}` "
             "\N{unamused face}\n\n"
         )
     return answer
@@ -104,7 +104,7 @@ def read_records(id: int) -> str:
     else:
         faculty_stat = db.test_get_all_points()
     db.close()
-    header = "Статистика по факультетам на данный момент:\n\n"
+    header = "Статистика на данный момент:\n\n"
     answer_stat = "\n".join(
         [
             f"*{faculty}*: `{choose_noun_case(score)}`"
