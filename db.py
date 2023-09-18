@@ -4,15 +4,15 @@ import sqlite3
 class DataBase:
     """Class to work with SQLite database."""
 
-    def __init__(self, database='juniors.sqlite'):
-        self.connection = sqlite3.connect(f'db/{database}')
+    def __init__(self, database="juniors.sqlite"):
+        self.connection = sqlite3.connect(f"db/{database}")
         self.cursor = self.connection.cursor()
 
     def create_database(self):
         """Initialization of the database."""
         with self.connection:
             self.cursor.executescript(
-                '''
+                """
             CREATE TABLE IF NOT EXISTS scores(
                 id INTEGER PRIMARY KEY,
                 time TEXT,
@@ -25,7 +25,18 @@ class DataBase:
                 faculty TEXT,
                 points INTEGER
             );
-            '''
+            CREATE TABLE IF NOT EXISTS messages(
+                id INTEGER PRIMARY KEY,
+                time TEXT,
+                timestamp INTEGER,
+                chat_id INTEGER,
+                user_id INTEGER,
+                username TEXT,
+                user_first_name TEXT,
+                user_last_name TEXT,
+                text TEXT
+            );
+            """
             )
         return True
 
@@ -33,23 +44,72 @@ class DataBase:
         """Saves points associated with faculty"""
         with self.connection:
             self.cursor.execute(
-                '''
+                """
                 INSERT INTO scores (time, faculty, points)
                 VALUES(datetime('now'), ?, ?);
-                ''',
+                """,
                 (faculty, points),
             )
+
+    def save_message(
+        self,
+        timestamp,
+        chat_id,
+        user_id,
+        username,
+        user_first_name,
+        user_last_name,
+        text,
+    ):
+        """Saves message to the database"""
+        with self.connection:
+            self.cursor.execute(
+                """
+                INSERT INTO messages (time,
+                                      timestamp,
+                                      chat_id,
+                                      user_id,
+                                      username,
+                                      user_first_name,
+                                      user_last_name,
+                                      text
+                                     )
+                VALUES(datetime('now'), ?, ?, ?, ?, ?, ?, ?);
+                """,
+                (
+                    timestamp,
+                    chat_id,
+                    user_id,
+                    username,
+                    user_first_name,
+                    user_last_name,
+                    text,
+                ),
+            )
+
+    def read_last_message(self):
+        """Reads last message from database"""
+        with self.connection:
+            self.cursor.execute(
+                '''
+                SELECT text
+                FROM messages
+                ORDER BY id DESC
+                LIMIT 1;
+                ''',
+            )
+        return self.cursor.fetchone()
 
     def get_all_points(self):
         """Fetches all score summary"""
         with self.connection:
             self.cursor.execute(
-                '''
+                """
             SELECT faculty, SUM(points) AS score
             FROM scores
             GROUP BY faculty
             ORDER BY score DESC;
-            '''
+            """
             )
         return self.cursor.fetchall()
 
@@ -57,10 +117,10 @@ class DataBase:
         """Saves points associated with faculty"""
         with self.connection:
             self.cursor.execute(
-                '''
+                """
                 INSERT INTO test_scores (time, faculty, points)
                 VALUES(datetime('now'), ?, ?);
-                ''',
+                """,
                 (faculty, points),
             )
 
@@ -68,12 +128,12 @@ class DataBase:
         """Fetches all score summary"""
         with self.connection:
             self.cursor.execute(
-                '''
+                """
             SELECT faculty, SUM(points) AS score
             FROM test_scores
             GROUP BY faculty
             ORDER BY score DESC;
-            '''
+            """
             )
         return self.cursor.fetchall()
 

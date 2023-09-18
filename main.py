@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from db import DataBase
 from language_utilities import choose_noun_case
+from url_parsing import find_url, read_url
 
 load_dotenv()
 ADMIN_ID = os.environ.get("ADMIN_ID")
@@ -20,6 +21,12 @@ FACULTY = {
 }
 bot = telebot.TeleBot(os.getenv("TEL_TOKEN"))
 
+bot.set_my_commands(
+    [
+        telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
+    ]
+)
+
 
 @bot.message_handler(commands=["start"])
 def start(message) -> None:
@@ -32,6 +39,28 @@ def start(message) -> None:
         ),
         parse_mode="Markdown",
     )
+
+
+@bot.message_handler(commands=["read_link"])
+def link(message):
+    """Tries to find the link in the last message and summarize the content."""
+    db = DataBase()
+    last_message = db.read_last_message()
+    db.close()
+    target = find_url(last_message[0])
+    if target:
+        answer = read_url(target[0])
+        if answer:
+            bot.send_message(message.chat.id, answer)
+        else:
+            bot.send_message(
+                message.chat.id,
+                "Ошибка при загрузке ссылки...",
+                parse_mode="Markdown",
+            )
+    else:
+        answer = "Не получилось найти ссылку в предыдущем сообщении..."
+        bot.send_message(message.chat.id, answer, parse_mode="Markdown")
 
 
 @bot.message_handler(content_types=["text"])
@@ -58,9 +87,7 @@ def handle_text(message) -> None:
         if score and faculty:
             score = -score if minus else score
             answer = new_score_record(faculty, score, message.from_user.id)
-            bot.send_message(
-                message.chat.id, answer, parse_mode="Markdown"
-            )
+            bot.send_message(message.chat.id, answer, parse_mode="Markdown")
     elif (
         message.from_user.id == int(ADMIN_ID)
         or message.from_user.id == int(INSPECT_ID)
@@ -73,6 +100,18 @@ def handle_text(message) -> None:
     ) and message.text.lower() == "тестстата":
         answer_stat = read_records(int(INSPECT_ID))
         bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
+    else:
+        db = DataBase()
+        db.save_message(
+            message.date,
+            message.chat.id,
+            message.from_user.id,
+            message.from_user.username,
+            message.from_user.first_name,
+            message.from_user.last_name,
+            message.text,
+        )
+        db.close()
 
 
 def new_score_record(faculty: str, score: int, id: int) -> str:
