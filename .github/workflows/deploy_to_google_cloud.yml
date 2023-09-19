@@ -28,6 +28,7 @@ jobs:
         TEL_TOKEN: ${{ secrets.TEL_TOKEN }}
         ADMIN_ID: ${{ secrets.ADMIN_ID }}
         INSPECT_ID: ${{ secrets.INSPECT_ID }}
+        YA_ID: ${{ secrets.YA_ID }}
       run: |
         flake8 .
         python tests.py 
