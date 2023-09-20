@@ -50,6 +50,10 @@ def start(message) -> None:
 @bot.message_handler(commands=["read_link"])
 def link(message):
     """Tries to find the link in the last message and summarize the content."""
+    if message.chat.type == "private" and message.from_user.id != int(
+        INSPECT_ID
+    ):
+        return
     db = DataBase()
     last_message = db.read_last_message()
     db.close()
