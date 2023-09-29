@@ -1,9 +1,9 @@
+import base64
 import os
 import re
 from datetime import datetime
 
 import requests
-import base64
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
