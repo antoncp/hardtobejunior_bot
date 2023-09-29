@@ -5,13 +5,14 @@ from dotenv import load_dotenv
 
 from db import DataBase
 from language_utilities import choose_noun_case
-from url_parsing import find_url, read_url
+from url_parsing import find_url, read_url, send_conversation
 
 load_dotenv()
 ADMIN_ID = os.environ.get("ADMIN_ID")
 INSPECT_ID = os.environ.get("INSPECT_ID")
 START_WORLD = "факульт"
 REDUCT_WORLD = "минус"
+NUM_MESSAGES = 30
 FACULTY = {
     "мобил": "Мобилпафф",
     "фулст": "Фулстекслей",
@@ -30,6 +31,8 @@ bot = telebot.TeleBot(os.getenv("TEL_TOKEN"))
 bot.set_my_commands(
     [
         telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
+        telebot.types.BotCommand("/sum_last_30", "Последние 30 сообщений"),
+        telebot.types.BotCommand("/sum_me", "Я в глазах бота"),
     ]
 )
 
@@ -71,6 +74,49 @@ def link(message):
     else:
         answer = "Не получилось найти ссылку в предыдущем сообщении..."
         bot.send_message(message.chat.id, answer, parse_mode="Markdown")
+
+
+@bot.message_handler(commands=["sum_last_30"])
+def summary(message):
+    """Summarizes last 30 messages in the chat."""
+    if message.chat.type == "private" and message.from_user.id != int(
+        INSPECT_ID
+    ):
+        return
+    db = DataBase()
+    messages = db.read_messages(NUM_MESSAGES)
+    db.close()
+    content = "<br><br>".join(
+        [
+            f"<b>{text[0]}:</b> {text[2]}"
+            if text[1] is None
+            else f"<b>{text[0]}, {text[1]}:</b> {text[2]}"
+            for text in reversed(messages)
+        ]
+    )
+    pre = "Последние 30 сообщений в этом чате в глазах бота:\n\n"
+    answer = send_conversation(content)
+    bot.send_message(message.chat.id, pre + answer)
+
+
+@bot.message_handler(commands=["sum_me"])
+def sum_me(message):
+    """Summarizes last 30 user's messages in the chat"""
+    user = message.from_user.id
+    db = DataBase()
+    messages = db.read_user_messages(user, NUM_MESSAGES)
+    db.close()
+    content = "<br><br>".join(
+        [
+            f"<b>{text[0]}:</b> {text[2]}"
+            if text[1] is None
+            else f"<b>{text[0]}, {text[1]}:</b> {text[2]}"
+            for text in reversed(messages)
+        ]
+    )
+    pre = f"{message.from_user.first_name} в глазах бота:\n\n"
+    answer = send_conversation(content)
+    bot.send_message(message.chat.id, pre + answer)
 
 
 @bot.message_handler(content_types=["text"])

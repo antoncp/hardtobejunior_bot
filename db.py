@@ -100,6 +100,37 @@ class DataBase:
             )
         return self.cursor.fetchone()
 
+    def read_messages(self, num_messages):
+        """Reads last n-messages from database"""
+        with self.connection:
+            self.cursor.execute(
+                '''
+                SELECT user_first_name, user_last_name, text
+                FROM messages
+                WHERE chat_id = -1001493663500
+                ORDER BY id DESC
+                LIMIT ?;
+                ''',
+                (num_messages,),
+            )
+        return self.cursor.fetchall()
+
+    def read_user_messages(self, user, num_messages):
+        """Reads last n-messages from database"""
+        with self.connection:
+            self.cursor.execute(
+                '''
+                SELECT user_first_name, user_last_name, text
+                FROM messages
+                WHERE user_id = ? AND
+                chat_id = -1001493663500
+                ORDER BY id DESC
+                LIMIT ?;
+                ''',
+                (user, num_messages),
+            )
+        return self.cursor.fetchall()
+
     def get_all_points(self):
         """Fetches all score summary"""
         with self.connection:
