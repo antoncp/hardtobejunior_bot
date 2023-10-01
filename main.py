@@ -31,8 +31,6 @@ bot = telebot.TeleBot(os.getenv("TEL_TOKEN"))
 bot.set_my_commands(
     [
         telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
-        telebot.types.BotCommand("/sum_last_30", "Последние 30 сообщений"),
-        telebot.types.BotCommand("/sum_me", "Я в глазах бота"),
     ]
 )
 
@@ -76,7 +74,7 @@ def link(message):
         bot.send_message(message.chat.id, answer, parse_mode="Markdown")
 
 
-@bot.message_handler(commands=["sum_last_30"])
+@bot.message_handler(commands=["summ_1"])
 def summary(message):
     """Summarizes last 30 messages in the chat."""
     if message.chat.type == "private" and message.from_user.id != int(
@@ -99,7 +97,7 @@ def summary(message):
     bot.send_message(message.chat.id, pre + answer)
 
 
-@bot.message_handler(commands=["sum_me"])
+@bot.message_handler(commands=["summ_2"])
 def sum_me(message):
     """Summarizes last 30 user's messages in the chat"""
     user = message.from_user.id
