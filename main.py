@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from db import DataBase
 from language_utilities import choose_noun_case
-from url_parsing import find_url, read_url, send_conversation
+from url_parsing import find_url, read_url, send_conversation, writing_message
 
 load_dotenv()
 ADMIN_ID = os.environ.get("ADMIN_ID")
@@ -166,6 +166,7 @@ def handle_text(message) -> None:
             message.text,
         )
         db.close()
+        writing_message(message)
 
 
 def new_score_record(faculty: str, score: int, id: int) -> str:

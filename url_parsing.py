@@ -1,4 +1,5 @@
 import base64
+import json
 import os
 import re
 from datetime import datetime
@@ -74,3 +75,23 @@ def send_conversation(content):
             return description
         else:
             return None
+
+
+def writing_message(message):
+    data = {
+        "timestamp": message.date,
+        "chat_id": message.chat.id,
+        "user_id": message.from_user.id,
+        "username": message.from_user.username,
+        "user_first_name": message.from_user.first_name,
+        "user_last_name": message.from_user.last_name,
+        "text": message.text,
+    }
+    url = "https://blog.antoncp.nl/save_message/"
+    username = API_LOGIN
+    password = API_PAS
+    credentials = base64.b64encode(
+        f"{username}:{password}".encode("utf-8")
+    ).decode("utf-8")
+    headers = {"Authorization": f"Basic {credentials}"}
+    requests.post(url, data=json.dumps(data), headers=headers)
