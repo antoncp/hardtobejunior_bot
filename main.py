@@ -1,32 +1,14 @@
-import os
-
 import telebot
-from dotenv import load_dotenv
 
+from api import find_url, read_url, send_conversation, writing_message
+from config import logger, settings
 from db import DataBase
 from language_utilities import choose_noun_case
-from url_parsing import find_url, read_url, send_conversation, writing_message
 
-load_dotenv()
-ADMIN_ID = os.environ.get("ADMIN_ID")
-INSPECT_ID = os.environ.get("INSPECT_ID")
-START_WORLD = "факульт"
-REDUCT_WORLD = "минус"
-NUM_MESSAGES = 30
-FACULTY = {
-    "мобил": "Мобилпафф",
-    "фулст": "Фулстекслей",
-    "фронд": "Фрондерин",
-    "фронт": "Фрондерин",
-    "бекен": "Бекендор",
-    "геймд": "Геймдевран",
-    "датаа": "Датааналирин",
-    "дизай": "Дизайндей",
-    "продж": "Проджектеран",
-    "тесте": "Тестендор",
-    "девоп": "Девопслей",
-}
-bot = telebot.TeleBot(os.getenv("TEL_TOKEN"))
+ADMIN_ID = settings.ADMIN_ID
+INSPECT_ID = settings.INSPECT_ID
+
+bot = telebot.TeleBot(settings.TEL_TOKEN)
 
 bot.set_my_commands(
     [
@@ -51,15 +33,15 @@ def start(message) -> None:
 @bot.message_handler(commands=["read_link"])
 def link(message):
     """Tries to find the link in the last message and summarize the content."""
-    if message.chat.type == "private" and message.from_user.id != int(
-        INSPECT_ID
-    ):
+    if message.chat.type == "private" and message.from_user.id != INSPECT_ID:
         return
     db = DataBase()
     last_message = db.read_last_message()
     db.close()
+    logger.warning(f"Поиск ссылки в сообщении: {last_message}")
     target = find_url(last_message[0])
     if target:
+        logger.warning(f"Найдена ссылка: {target}")
         answer = read_url(target[0])
         if answer:
             bot.send_message(message.chat.id, answer)
@@ -77,12 +59,10 @@ def link(message):
 @bot.message_handler(commands=["summ_1"])
 def summary(message):
     """Summarizes last 30 messages in the chat."""
-    if message.chat.type == "private" and message.from_user.id != int(
-        INSPECT_ID
-    ):
+    if message.chat.type == "private" and message.from_user.id != INSPECT_ID:
         return
     db = DataBase()
-    messages = db.read_messages(NUM_MESSAGES)
+    messages = db.read_messages(settings.NUM_MESSAGES)
     db.close()
     content = "<br><br>".join(
         [
@@ -102,7 +82,7 @@ def sum_me(message):
     """Summarizes last 30 user's messages in the chat"""
     user = message.from_user.id
     db = DataBase()
-    messages = db.read_user_messages(user, NUM_MESSAGES)
+    messages = db.read_user_messages(user, settings.NUM_MESSAGES)
     db.close()
     content = "<br><br>".join(
         [
@@ -124,35 +104,35 @@ def handle_text(message) -> None:
     to one of the faculties.
     """
     if (
-        message.from_user.id == int(ADMIN_ID)
-        or message.from_user.id == int(INSPECT_ID)
-    ) and START_WORLD in message.text.lower():
+        message.from_user.id == ADMIN_ID
+        or message.from_user.id == INSPECT_ID
+    ) and settings.START_WORLD in message.text.lower():
         score = [_ for _ in message.text if _.isdigit()]
-        minus = True if REDUCT_WORLD in message.text.lower() else False
+        minus = True if settings.REDUCT_WORLD in message.text.lower() else False
         if score:
             score = int("".join(score))
         faculty = [
             _
             for _ in message.text.split()
-            if _.lower().startswith(tuple(FACULTY.keys()))
+            if _.lower().startswith(tuple(settings.FACULTY.keys()))
         ]
         if faculty:
-            faculty = FACULTY[faculty[0][:5].lower()]
+            faculty = settings.FACULTY[faculty[0][:5].lower()]
         if score and faculty:
             score = -score if minus else score
             answer = new_score_record(faculty, score, message.from_user.id)
             bot.send_message(message.chat.id, answer, parse_mode="Markdown")
     elif (
-        message.from_user.id == int(ADMIN_ID)
-        or message.from_user.id == int(INSPECT_ID)
+        message.from_user.id == ADMIN_ID
+        or message.from_user.id == INSPECT_ID
     ) and message.text.lower() == "стата":
-        answer_stat = read_records(int(ADMIN_ID))
+        answer_stat = read_records(ADMIN_ID)
         bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
     elif (
-        message.from_user.id == int(ADMIN_ID)
-        or message.from_user.id == int(INSPECT_ID)
+        message.from_user.id == ADMIN_ID
+        or message.from_user.id == INSPECT_ID
     ) and message.text.lower() == "тестстата":
-        answer_stat = read_records(int(INSPECT_ID))
+        answer_stat = read_records(INSPECT_ID)
         bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
     else:
         db = DataBase()
@@ -172,7 +152,7 @@ def handle_text(message) -> None:
 def new_score_record(faculty: str, score: int, id: int) -> str:
     """Adds new scores record to the database."""
     db = DataBase()
-    if id == int(ADMIN_ID):
+    if id == ADMIN_ID:
         db.save_points(faculty, score)
     else:
         db.test_save_points(faculty, score)

@@ -1,17 +1,12 @@
 import base64
 import json
-import os
 import re
 from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 
-load_dotenv()
-YA_ID = os.environ.get("YA_ID")
-API_LOGIN = os.environ.get("API_LOGIN")
-API_PAS = os.environ.get("API_PAS")
+from config import logger, settings
 
 
 def find_url(text):
@@ -24,7 +19,7 @@ def send_yandex_api(link):
     response = requests.post(
         endpoint,
         json={"article_url": f"{link}"},
-        headers={"Authorization": f"OAuth {YA_ID}"},
+        headers={"Authorization": f"OAuth {settings.YA_ID}"},
     )
     return response.json().get("sharing_url")
 
@@ -32,6 +27,7 @@ def send_yandex_api(link):
 def read_url(target):
     final_url = send_yandex_api(target)
     if final_url:
+        logger.warning(f"Получен ответ от YandexGPT: {final_url}")
         response = requests.get(final_url)
         soup = BeautifulSoup(response.content, "html.parser")
         og_title_tag = soup.find("meta", attrs={"property": "og:title"})
@@ -51,8 +47,8 @@ def send_conversation(content):
     dt = datetime.now()
     time_name = str(datetime.timestamp(dt)).replace(".", "")
     url = f"https://blog.antoncp.nl/create_page/{time_name}"
-    username = API_LOGIN
-    password = API_PAS
+    username = settings.API_LOGIN
+    password = settings.API_PAS
     credentials = base64.b64encode(
         f"{username}:{password}".encode("utf-8")
     ).decode("utf-8")
@@ -88,12 +84,15 @@ def writing_message(message):
         "text": message.text,
     }
     url = "http://localhost/save_message/"
-    username = API_LOGIN
-    password = API_PAS
+    username = settings.API_LOGIN
+    password = settings.API_PAS
     credentials = base64.b64encode(
         f"{username}:{password}".encode("utf-8")
     ).decode("utf-8")
     headers = {"Authorization": f"Basic {credentials}"}
-    requests.post(
-        url, data=json.dumps(data), headers=headers, timeout=(1, None)
-    )
+    try:
+        requests.post(
+            url, data=json.dumps(data), headers=headers, timeout=(1, None)
+        )
+    except Exception as e:
+        logger.debug(f"ОШИБКА ЗАПИСИ: {e}")
