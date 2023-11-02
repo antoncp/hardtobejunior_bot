@@ -1,6 +1,6 @@
 import logging
-from logging.handlers import RotatingFileHandler
 import os
+from logging.handlers import RotatingFileHandler
 
 from dotenv import load_dotenv
 
@@ -8,7 +8,7 @@ load_dotenv()
 
 
 # Environment variables set up
-class Settings():
+class Settings:
     TEL_TOKEN = os.getenv("TEL_TOKEN")
     ADMIN_ID = int(os.environ.get("ADMIN_ID"))
     INSPECT_ID = int(os.environ.get("INSPECT_ID"))
@@ -39,7 +39,7 @@ settings = Settings()
 logging.basicConfig(
     level=logging.DEBUG,
     handlers=[
-        RotatingFileHandler('db/all.log', maxBytes=5000000, backupCount=5)
+        RotatingFileHandler("db/all.log", maxBytes=5000000, backupCount=5)
     ],
     format="%(asctime)s %(levelname)s - %(module)s:%(lineno)d"
     " (%(funcName)s) - %(message)s",

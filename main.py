@@ -104,11 +104,12 @@ def handle_text(message) -> None:
     to one of the faculties.
     """
     if (
-        message.from_user.id == ADMIN_ID
-        or message.from_user.id == INSPECT_ID
+        message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID
     ) and settings.START_WORLD in message.text.lower():
         score = [_ for _ in message.text if _.isdigit()]
-        minus = True if settings.REDUCT_WORLD in message.text.lower() else False
+        minus = (
+            True if settings.REDUCT_WORLD in message.text.lower() else False
+        )
         if score:
             score = int("".join(score))
         faculty = [
@@ -123,14 +124,12 @@ def handle_text(message) -> None:
             answer = new_score_record(faculty, score, message.from_user.id)
             bot.send_message(message.chat.id, answer, parse_mode="Markdown")
     elif (
-        message.from_user.id == ADMIN_ID
-        or message.from_user.id == INSPECT_ID
+        message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID
     ) and message.text.lower() == "стата":
         answer_stat = read_records(ADMIN_ID)
         bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
     elif (
-        message.from_user.id == ADMIN_ID
-        or message.from_user.id == INSPECT_ID
+        message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID
     ) and message.text.lower() == "тестстата":
         answer_stat = read_records(INSPECT_ID)
         bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
