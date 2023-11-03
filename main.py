@@ -38,10 +38,10 @@ def link(message):
     db = DataBase()
     last_message = db.read_last_message()
     db.close()
-    logger.warning(f"Поиск ссылки в сообщении: {last_message}")
+    logger.info(f"Поиск ссылки в сообщении: {last_message}")
     target = find_url(last_message[0])
     if target:
-        logger.warning(f"Найдена ссылка: {target}")
+        logger.info(f"Найдена ссылка: {target}")
         answer = read_url(target[0])
         if answer:
             bot.send_message(message.chat.id, answer)

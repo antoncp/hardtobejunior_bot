@@ -37,7 +37,7 @@ settings = Settings()
 
 # Logs configuration
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     handlers=[
         RotatingFileHandler("db/all.log", maxBytes=5000000, backupCount=5)
     ],
@@ -55,6 +55,6 @@ formatter = logging.Formatter(
 # Custom logger for adjusted events
 logger = logging.getLogger("Warning_logger")
 warning_handler = logging.FileHandler("db/custom.log")
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.DEBUG)
 logger.addHandler(warning_handler)
 warning_handler.setFormatter(formatter)

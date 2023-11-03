@@ -1,5 +1,6 @@
 import base64
 import json
+import logging
 import re
 from datetime import datetime
 
@@ -27,7 +28,7 @@ def send_yandex_api(link):
 def read_url(target):
     final_url = send_yandex_api(target)
     if final_url:
-        logger.warning(f"Получен ответ от YandexGPT: {final_url}")
+        logger.info(f"Получен ответ от YandexGPT: {final_url}")
         response = requests.get(final_url)
         soup = BeautifulSoup(response.content, "html.parser")
         og_title_tag = soup.find("meta", attrs={"property": "og:title"})
@@ -40,6 +41,7 @@ def read_url(target):
             description = og_description_tag["content"]
         return title + "\n\n" + description
     else:
+        logger.warning("Ошибка в ответе от YandexGPT")
         return None
 
 
@@ -95,4 +97,4 @@ def writing_message(message):
             url, data=json.dumps(data), headers=headers, timeout=(1, None)
         )
     except Exception as e:
-        logger.debug(f"ОШИБКА ЗАПИСИ: {e}")
+        logging.info(f"ОШИБКА ЗАПИСИ: {e}")
