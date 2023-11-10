@@ -71,8 +71,6 @@ def send_conversation(content):
             if og_description_tag:
                 description = og_description_tag["content"]
             return description
-        else:
-            return None
 
 
 def writing_message(message):
