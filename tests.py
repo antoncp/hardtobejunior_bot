@@ -2,9 +2,12 @@ import os
 import unittest
 from unittest.mock import Mock
 
+from config import settings
 from db import DataBase
 from language_utilities import choose_noun_case
 from main import handle_text, start
+
+settings.DEBUG = True
 
 
 def test_noun_case():
@@ -30,22 +33,49 @@ def test_database():
 
 
 class TestTelebot(unittest.TestCase):
-    def test_start_command(self):
-        mocked_update = Mock()
-        mocked_update.chat.id = 82176433
-        assert start(mocked_update).text.startswith("I'am watching")
+    @classmethod
+    def setUpClass(cls):
+        db = DataBase()
+        db.create_database()
+        db.close()
 
-    def test_text_command(self):
-        mocked_update = Mock()
-        mocked_update.chat.id = 82176433
-        mocked_update.from_user.id = 82176433
-        mocked_update.text = "Факультету бекендеров начислить 20 баллов"
-        assert handle_text(mocked_update).text.startswith(
-            "Фaкультет Бекендор получает 20 баллов"
+    @classmethod
+    def tearDownClass(cls):
+        if os.path.exists("db/tests.sqlite"):
+            os.remove("db/tests.sqlite")
+
+    def setUp(self):
+        self.message = Mock()
+        self.message.chat.id = 82176433
+        self.message.from_user.id = 82176433
+
+    def tearDown(self):
+        pass
+
+    def test_start_command(self):
+        """Tests start message of the bot"""
+        self.assertTrue(start(self.message).text.startswith("I'am watching"))
+
+    def test_adding_score(self):
+        """Tests adding new score to the faculties (Backendor in this case)"""
+        self.message.text = "Факультету бекендеров начислить 20 баллов"
+        self.assertTrue(
+            handle_text(self.message).text.startswith(
+                "Фaкультет Бекендор получает 20 баллов"
+            )
+        )
+
+    def test_subtracting_score(self):
+        """Tests subtracting score (Fronderin in this case)"""
+        self.message.text = "Минус 10 баллов факультету фронтендеров"
+        self.assertTrue(
+            handle_text(self.message).text.startswith(
+                "Фaкультет Фрондерин теряет -10 баллов"
+            )
         )
 
 
 if __name__ == "__main__":
     test_noun_case()
     test_database()
-    unittest.main()
+    unittest.main(verbosity=2)
