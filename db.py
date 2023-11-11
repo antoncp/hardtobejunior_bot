@@ -1,10 +1,14 @@
 import sqlite3
 
+from config import settings
+
 
 class DataBase:
     """Class to work with SQLite database."""
 
     def __init__(self, database="juniors.sqlite"):
+        if settings.DEBUG:
+            database = "tests.sqlite"
         self.connection = sqlite3.connect(f"db/{database}")
         self.cursor = self.connection.cursor()
 
@@ -91,12 +95,12 @@ class DataBase:
         """Reads last message from database"""
         with self.connection:
             self.cursor.execute(
-                '''
+                """
                 SELECT text
                 FROM messages
                 ORDER BY id DESC
                 LIMIT 1;
-                ''',
+                """,
             )
         return self.cursor.fetchone()
 
@@ -104,13 +108,13 @@ class DataBase:
         """Reads last n-messages from database"""
         with self.connection:
             self.cursor.execute(
-                '''
+                """
                 SELECT user_first_name, user_last_name, text
                 FROM messages
                 WHERE chat_id = -1001493663500
                 ORDER BY id DESC
                 LIMIT ?;
-                ''',
+                """,
                 (num_messages,),
             )
         return self.cursor.fetchall()
@@ -119,14 +123,14 @@ class DataBase:
         """Reads last n-messages from database"""
         with self.connection:
             self.cursor.execute(
-                '''
+                """
                 SELECT user_first_name, user_last_name, text
                 FROM messages
                 WHERE user_id = ? AND
                 chat_id = -1001493663500
                 ORDER BY id DESC
                 LIMIT ?;
-                ''',
+                """,
                 (user, num_messages),
             )
         return self.cursor.fetchall()

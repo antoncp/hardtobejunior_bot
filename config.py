@@ -10,6 +10,7 @@ load_dotenv()
 # Environment variables set up
 class Settings:
     TEL_TOKEN = os.getenv("TEL_TOKEN")
+    DEBUG = os.getenv("DEBUG") == "True"
     ADMIN_ID = int(os.environ.get("ADMIN_ID"))
     INSPECT_ID = int(os.environ.get("INSPECT_ID"))
     YA_ID = os.environ.get("YA_ID")

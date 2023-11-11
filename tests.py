@@ -18,9 +18,9 @@ def test_noun_case():
 
 def test_database():
     "Pure database test"
-    if os.path.exists("db/test.sqlite"):
-        os.remove("db/test.sqlite")
-    db = DataBase("test.sqlite")
+    if os.path.exists("db/tests.sqlite"):
+        os.remove("db/tests.sqlite")
+    db = DataBase()
     db.create_database()
     db.save_points("Бекендор", 100)
     db.save_points("Фрондерин", 15)
