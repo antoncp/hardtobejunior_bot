@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 from db import DataBase
 from language_utilities import choose_noun_case
-from main import start, handle_text
+from main import handle_text, start
 
 
 def test_noun_case():
