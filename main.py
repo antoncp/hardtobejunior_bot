@@ -20,7 +20,7 @@ bot.set_my_commands(
 @bot.message_handler(commands=["start"])
 def start(message) -> None:
     """Handles answer of the bot on start command."""
-    bot.send_message(
+    return bot.send_message(
         message.chat.id,
         (
             "I'am watching you \N{eyes}, kids! Let's add some"
@@ -122,7 +122,9 @@ def handle_text(message) -> None:
         if score and faculty:
             score = -score if minus else score
             answer = new_score_record(faculty, score, message.from_user.id)
-            bot.send_message(message.chat.id, answer, parse_mode="Markdown")
+            return bot.send_message(
+                message.chat.id, answer, parse_mode="Markdown"
+            )
     elif (
         message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID
     ) and message.text.lower() == "стата":

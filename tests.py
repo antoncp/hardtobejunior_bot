@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 from db import DataBase
 from language_utilities import choose_noun_case
-from main import start
+from main import start, handle_text
 
 
 def test_noun_case():
@@ -33,7 +33,16 @@ class TestTelebot(unittest.TestCase):
     def test_start_command(self):
         mocked_update = Mock()
         mocked_update.chat.id = 82176433
-        start(mocked_update)
+        assert start(mocked_update).text.startswith("I'am watching")
+
+    def test_text_command(self):
+        mocked_update = Mock()
+        mocked_update.chat.id = 82176433
+        mocked_update.from_user.id = 82176433
+        mocked_update.text = "Факультету бекендеров начислить 20 баллов"
+        assert handle_text(mocked_update).text.startswith(
+            "Фaкультет Бекендор получает 20 баллов"
+        )
 
 
 if __name__ == "__main__":
