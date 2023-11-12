@@ -129,12 +129,16 @@ def handle_text(message) -> None:
         message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID
     ) and message.text.lower() == "стата":
         answer_stat = read_records(ADMIN_ID)
-        bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
+        return bot.send_message(
+            message.chat.id, answer_stat, parse_mode="Markdown"
+        )
     elif (
         message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID
     ) and message.text.lower() == "тестстата":
         answer_stat = read_records(INSPECT_ID)
-        bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
+        return bot.send_message(
+            message.chat.id, answer_stat, parse_mode="Markdown"
+        )
     else:
         db = DataBase()
         db.save_message(

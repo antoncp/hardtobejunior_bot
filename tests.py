@@ -74,6 +74,15 @@ class TestTelebot(unittest.TestCase):
             )
         )
 
+    def test_stats(self):
+        """Tests showing statistic of all scores"""
+        self.message.text = "тестстата"
+        self.assertTrue(
+            handle_text(self.message).text.startswith(
+                "Статистика на данный момент"
+            )
+        )
+
 
 if __name__ == "__main__":
     test_noun_case()
