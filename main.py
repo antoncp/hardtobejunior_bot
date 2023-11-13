@@ -139,6 +139,16 @@ def handle_text(message) -> None:
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
         )
+    elif message.text.lower() == "лог":
+        if message.chat.id == INSPECT_ID:
+            with open("db/all.log") as all_file:
+                bot.send_document(
+                    message.chat.id, all_file, caption="Полный лог"
+                )
+            with open("db/custom.log") as custom_file:
+                bot.send_document(
+                    message.chat.id, custom_file, caption="История запросов"
+                )
     else:
         db = DataBase()
         db.save_message(
