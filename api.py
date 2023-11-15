@@ -94,5 +94,5 @@ def writing_message(message):
         requests.post(
             url, data=json.dumps(data), headers=headers, timeout=(1, None)
         )
-    except Exception as e:
-        logging.info(f"ОШИБКА ЗАПИСИ: {e}")
+    except Exception:
+        logging.info(f"ОШИБКА ЗАПИСИ: {message.text[:45]}...")

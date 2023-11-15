@@ -16,6 +16,14 @@ bot.set_my_commands(
     ]
 )
 
+bot.set_my_commands(
+   commands=[
+            telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
+            telebot.types.BotCommand('/show_logs', 'Показать логи'),
+   ],
+   scope=telebot.types.BotCommandScopeChat(INSPECT_ID)
+)
+
 
 @bot.message_handler(commands=["start"])
 def start(message) -> None:
@@ -54,6 +62,20 @@ def link(message):
     else:
         answer = "Не получилось найти ссылку в предыдущем сообщении..."
         bot.send_message(message.chat.id, answer, parse_mode="Markdown")
+
+
+@bot.message_handler(commands=["show_logs"])
+def show_logs(message):
+    """Sends logs files of app to the admin."""
+    if message.chat.id == INSPECT_ID:
+        with open("db/all.log") as all_file:
+            bot.send_document(
+                message.chat.id, all_file, caption="Полный лог"
+            )
+        with open("db/custom.log") as custom_file:
+            bot.send_document(
+                message.chat.id, custom_file, caption="История запросов"
+            )
 
 
 @bot.message_handler(commands=["summ_1"])
@@ -139,16 +161,6 @@ def handle_text(message) -> None:
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
         )
-    elif message.text.lower() == "лог":
-        if message.chat.id == INSPECT_ID:
-            with open("db/all.log") as all_file:
-                bot.send_document(
-                    message.chat.id, all_file, caption="Полный лог"
-                )
-            with open("db/custom.log") as custom_file:
-                bot.send_document(
-                    message.chat.id, custom_file, caption="История запросов"
-                )
     else:
         db = DataBase()
         db.save_message(
