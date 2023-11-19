@@ -17,22 +17,28 @@ bot.set_my_commands(
 )
 
 bot.set_my_commands(
-   commands=[
-            telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
-            telebot.types.BotCommand('/show_logs', 'Показать логи'),
-            telebot.types.BotCommand('/show_stat', 'Баллы факультетов'),
-   ],
-   scope=telebot.types.BotCommandScopeChat(INSPECT_ID)
+    commands=[
+        telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
+        telebot.types.BotCommand("/show_logs", "Показать логи"),
+        telebot.types.BotCommand("/show_stat", "Баллы факультетов"),
+    ],
+    scope=telebot.types.BotCommandScopeChat(INSPECT_ID),
 )
 
 if not settings.DEBUG:
-    bot.set_my_commands(
-       commands=[
+    try:
+        bot.set_my_commands(
+            commands=[
                 telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
-                telebot.types.BotCommand('/show_stat', 'Баллы факультетов'),
-       ],
-       scope=telebot.types.BotCommandScopeChat(ADMIN_ID)
-    )
+                telebot.types.BotCommand("/show_stat", "Баллы факультетов"),
+            ],
+            scope=telebot.types.BotCommandScopeChat(ADMIN_ID),
+        )
+    except Exception as e:
+        print(
+            f"ОШИБКА установки команд для {ADMIN_ID}. Режим "
+            f"DEBUG {settings.DEBUG}. Детали ошибки: {e}"
+        )
 
 
 @bot.message_handler(commands=["start"])
@@ -79,9 +85,7 @@ def show_logs(message):
     """Sends logs files of app to the admin."""
     if message.chat.id == INSPECT_ID:
         with open("db/all.log") as all_file:
-            bot.send_document(
-                message.chat.id, all_file, caption="Полный лог"
-            )
+            bot.send_document(message.chat.id, all_file, caption="Полный лог")
         with open("db/custom.log") as custom_file:
             bot.send_document(
                 message.chat.id, custom_file, caption="История запросов"
