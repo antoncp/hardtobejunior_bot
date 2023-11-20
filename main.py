@@ -35,10 +35,12 @@ if not settings.DEBUG:
             scope=telebot.types.BotCommandScopeChat(ADMIN_ID),
         )
     except Exception as e:
-        print(
+        message = (
             f"ОШИБКА установки команд для {ADMIN_ID}. Режим "
             f"DEBUG {settings.DEBUG}. Детали ошибки: {e}"
         )
+        print(message)
+        logger.warning(message)
 
 
 @bot.message_handler(commands=["start"])
@@ -95,8 +97,17 @@ def show_logs(message):
 @bot.message_handler(commands=["show_stat"])
 def show_stat(message):
     """Shows statistic of score by faculty."""
-    if message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID:
+    if message.from_user.id == ADMIN_ID: 
         answer_stat = read_records(ADMIN_ID)
+        return bot.send_message(
+            message.chat.id, answer_stat, parse_mode="Markdown"
+        )
+    if message.from_user.id == INSPECT_ID:
+        answer_stat = read_records(ADMIN_ID)
+        bot.send_message(
+            message.chat.id, answer_stat, parse_mode="Markdown"
+        )
+        answer_stat = read_records(INSPECT_ID)
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
         )
@@ -226,10 +237,11 @@ def read_records(id: int) -> str:
     db = DataBase()
     if id == int(ADMIN_ID):
         faculty_stat = db.get_all_points()
+        header = "Статистика на данный момент:\n\n"
     else:
         faculty_stat = db.test_get_all_points()
+        header = "Тестовая статистика на данный момент:\n\n"
     db.close()
-    header = "Статистика на данный момент:\n\n"
     answer_stat = "\n".join(
         [
             f"*{faculty}*: `{choose_noun_case(score)}`"
