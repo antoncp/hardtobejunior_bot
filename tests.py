@@ -79,7 +79,7 @@ class TestTelebot(unittest.TestCase):
         self.message.text = "тестстата"
         self.assertTrue(
             handle_text(self.message).text.startswith(
-                "Статистика на данный момент"
+                "Тестовая статистика на данный момент"
             )
         )
 
