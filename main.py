@@ -97,16 +97,14 @@ def show_logs(message):
 @bot.message_handler(commands=["show_stat"])
 def show_stat(message):
     """Shows statistic of score by faculty."""
-    if message.from_user.id == ADMIN_ID: 
+    if message.from_user.id == ADMIN_ID:
         answer_stat = read_records(ADMIN_ID)
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
         )
     if message.from_user.id == INSPECT_ID:
         answer_stat = read_records(ADMIN_ID)
-        bot.send_message(
-            message.chat.id, answer_stat, parse_mode="Markdown"
-        )
+        bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
         answer_stat = read_records(INSPECT_ID)
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
