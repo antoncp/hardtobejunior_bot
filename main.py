@@ -95,7 +95,7 @@ def show_logs(message):
             )
 
 
-@bot.message_handler(commands=["/house_points"])
+@bot.message_handler(commands=["house_points"])
 def show_stat(message):
     """Shows statistic of score by faculty."""
     if message.chat.id == INSPECT_ID:
