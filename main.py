@@ -13,6 +13,7 @@ bot = telebot.TeleBot(settings.TEL_TOKEN)
 bot.set_my_commands(
     [
         telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
+        telebot.types.BotCommand("/HousePoints", "Баллы факультетов"),
     ]
 )
 
@@ -20,7 +21,7 @@ bot.set_my_commands(
     commands=[
         telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
         telebot.types.BotCommand("/show_logs", "Показать логи"),
-        telebot.types.BotCommand("/show_stat", "Баллы факультетов"),
+        telebot.types.BotCommand("/HousePoints", "Баллы факультетов"),
     ],
     scope=telebot.types.BotCommandScopeChat(INSPECT_ID),
 )
@@ -30,7 +31,7 @@ if not settings.DEBUG:
         bot.set_my_commands(
             commands=[
                 telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
-                telebot.types.BotCommand("/show_stat", "Баллы факультетов"),
+                telebot.types.BotCommand("/HousePoints", "Баллы факультетов"),
             ],
             scope=telebot.types.BotCommandScopeChat(ADMIN_ID),
         )
@@ -94,18 +95,18 @@ def show_logs(message):
             )
 
 
-@bot.message_handler(commands=["show_stat"])
+@bot.message_handler(commands=["HousePoints"])
 def show_stat(message):
     """Shows statistic of score by faculty."""
-    if message.from_user.id == ADMIN_ID:
-        answer_stat = read_records(ADMIN_ID)
-        return bot.send_message(
-            message.chat.id, answer_stat, parse_mode="Markdown"
-        )
-    if message.from_user.id == INSPECT_ID:
+    if message.chat.id == INSPECT_ID:
         answer_stat = read_records(ADMIN_ID)
         bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
         answer_stat = read_records(INSPECT_ID)
+        return bot.send_message(
+            message.chat.id, answer_stat, parse_mode="Markdown"
+        )
+    else:
+        answer_stat = read_records(ADMIN_ID)
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
         )
