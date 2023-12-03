@@ -13,7 +13,7 @@ bot = telebot.TeleBot(settings.TEL_TOKEN)
 bot.set_my_commands(
     [
         telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
-        telebot.types.BotCommand("/HousePoints", "Баллы факультетов"),
+        telebot.types.BotCommand("/house_points", "Баллы факультетов"),
     ]
 )
 
@@ -21,7 +21,7 @@ bot.set_my_commands(
     commands=[
         telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
         telebot.types.BotCommand("/show_logs", "Показать логи"),
-        telebot.types.BotCommand("/HousePoints", "Баллы факультетов"),
+        telebot.types.BotCommand("/house_points", "Баллы факультетов"),
     ],
     scope=telebot.types.BotCommandScopeChat(INSPECT_ID),
 )
@@ -31,7 +31,7 @@ if not settings.DEBUG:
         bot.set_my_commands(
             commands=[
                 telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
-                telebot.types.BotCommand("/HousePoints", "Баллы факультетов"),
+                telebot.types.BotCommand("/house_points", "Баллы факультетов"),
             ],
             scope=telebot.types.BotCommandScopeChat(ADMIN_ID),
         )
@@ -95,7 +95,7 @@ def show_logs(message):
             )
 
 
-@bot.message_handler(commands=["HousePoints"])
+@bot.message_handler(commands=["/house_points"])
 def show_stat(message):
     """Shows statistic of score by faculty."""
     if message.chat.id == INSPECT_ID:
