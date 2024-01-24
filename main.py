@@ -268,7 +268,7 @@ def monitoring_friday_talks():
     now = now + delta
     print(now)
     global FRIDAY_MODE
-    if now.weekday() == 3:
+    if now.weekday() == 4:
         from_midnight = int(
             (
                 now - now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -281,7 +281,7 @@ def monitoring_friday_talks():
                 "пятницы \N{party popper}"
             )
             bot.send_message(settings.CHAT_ALERT, answer)
-            # FRIDAY_MODE = True
+            FRIDAY_MODE = True
         elif 100 < from_midnight < 1000:
             FRIDAY_MODE = False
     elif now.weekday() == 5:
