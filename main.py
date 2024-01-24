@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta, timezone
+from threading import Timer
+
 import telebot
 
 from api import find_url, read_url, send_conversation, writing_message
@@ -7,6 +10,7 @@ from language_utilities import choose_noun_case
 
 ADMIN_ID = settings.ADMIN_ID
 INSPECT_ID = settings.INSPECT_ID
+FRIDAY_MODE = False
 
 bot = telebot.TeleBot(settings.TEL_TOKEN)
 
@@ -190,6 +194,8 @@ def handle_text(message) -> None:
     elif (
         message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID
     ) and message.text.lower() == "тестстата":
+        global FRIDAY_MODE
+        FRIDAY_MODE = True
         answer_stat = read_records(INSPECT_ID)
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
@@ -249,8 +255,54 @@ def read_records(id: int) -> str:
     return header + answer_stat
 
 
+def monitoring_friday_talks():
+    """Every minute checks the Friday's talks conditions.
+    If the Friday starts - sends a message to the chat.
+    The same in the end of Friday.
+    """
+    one_minute_monitor = Timer(60.0, monitoring_friday_talks)
+    one_minute_monitor.start()
+    now = datetime.now(timezone.utc)
+    delta = timedelta(hours=1, minutes=0)
+    now = now + delta
+    print(now)
+    global FRIDAY_MODE
+    if now.weekday() == 3:
+        from_midnight = int(
+            (
+                now - now.replace(hour=0, minute=0, second=0, microsecond=0)
+            ).total_seconds()
+        )
+        if from_midnight <= 70 and not FRIDAY_MODE:
+            answer = (
+                "\N{party popper} Идущие на флуд приветствуют тебя. "
+                "Разговорчики не по теме в строю разрешены на время "
+                "пятницы \N{party popper}"
+            )
+            bot.send_message(settings.CHAT_ALERT, answer)
+            # FRIDAY_MODE = True
+        elif 100 < from_midnight < 1000:
+            FRIDAY_MODE = False
+    elif now.weekday() == 5:
+        from_midnight = int(
+            (
+                now - now.replace(hour=0, minute=0, second=0, microsecond=0)
+            ).total_seconds()
+        )
+        if from_midnight <= 70 and not FRIDAY_MODE:
+            answer = (
+                "Флудный день окончен \N{unamused face}. "
+                "Всем спасибо, все свободны."
+            )
+            bot.send_message(settings.CHAT_ALERT, answer)
+            FRIDAY_MODE = True
+        elif 100 < from_midnight < 1000:
+            FRIDAY_MODE = False
+
+
 if __name__ == "__main__":
     db = DataBase()
     db.create_database()
     db.close()
+    monitoring_friday_talks()
     bot.infinity_polling(timeout=10, long_polling_timeout=5)
