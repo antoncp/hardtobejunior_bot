@@ -106,6 +106,8 @@ def show_stat(message):
         answer_stat = read_records(ADMIN_ID)
         bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
         answer_stat = read_records(INSPECT_ID)
+        now = get_time(1)
+        answer_stat = f'{now.strftime("%m/%d/%Y, %H:%M:%S")}\n\n' + answer_stat
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
         )
@@ -263,10 +265,7 @@ def monitoring_friday_talks():
     """
     one_minute_monitor = Timer(60.0, monitoring_friday_talks)
     one_minute_monitor.start()
-    now = datetime.now(timezone.utc)
-    delta = timedelta(hours=1, minutes=0)
-    now = now + delta
-    print(now)
+    now = get_time(1)
     global FRIDAY_MODE
     if now.weekday() == 4:
         from_midnight = int(
@@ -299,6 +298,15 @@ def monitoring_friday_talks():
             FRIDAY_MODE = True
         elif 100 < from_midnight < 1000:
             FRIDAY_MODE = False
+
+
+def get_time(shift=None):
+    """Returns real time. UTC + shift in hours."""
+    now = datetime.now(timezone.utc)
+    if shift:
+        delta = timedelta(hours=shift, minutes=0)
+        now = now + delta
+    return now
 
 
 if __name__ == "__main__":
