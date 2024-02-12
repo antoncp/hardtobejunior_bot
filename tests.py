@@ -4,8 +4,8 @@ from unittest.mock import Mock
 
 from config import settings
 from db import DataBase
-from language_utilities import choose_noun_case
 from main import handle_text, start
+from utilities import choose_noun_case
 
 settings.DEBUG = True
 

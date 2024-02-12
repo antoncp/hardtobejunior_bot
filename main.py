@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta, timezone
 from threading import Timer
 
 import telebot
@@ -6,7 +5,8 @@ import telebot
 from api import find_url, read_url, send_conversation, writing_message
 from config import logger, settings
 from db import DataBase
-from language_utilities import choose_noun_case
+from health_endpoint import flask_thread, shutdown_event
+from utilities import choose_noun_case, get_time
 
 ADMIN_ID = settings.ADMIN_ID
 INSPECT_ID = settings.INSPECT_ID
@@ -300,18 +300,14 @@ def monitoring_friday_talks():
             FRIDAY_MODE = False
 
 
-def get_time(shift=None):
-    """Returns real time. UTC + shift in hours."""
-    now = datetime.now(timezone.utc)
-    if shift:
-        delta = timedelta(hours=shift, minutes=0)
-        now = now + delta
-    return now
-
-
 if __name__ == "__main__":
     db = DataBase()
     db.create_database()
     db.close()
+    flask_thread.start()
     monitoring_friday_talks()
-    bot.infinity_polling(timeout=10, long_polling_timeout=5)
+    try:
+        bot.infinity_polling(timeout=10, long_polling_timeout=5)
+    except Exception as e:
+        logger.error(f"Error in Telegram bot: {e}")
+        shutdown_event.set()
