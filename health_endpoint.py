@@ -12,7 +12,7 @@ shutdown_event = Event()
 @app.route("/", methods=["GET"])
 def webhook():
     if not shutdown_event.is_set():
-        now = get_time(1)
+        now = get_time(2)
         intro = "The server time now is:"
         time = now.strftime("%m/%d/%Y, %H:%M:%S")
         message = [intro, time]

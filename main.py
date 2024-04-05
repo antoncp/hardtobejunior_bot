@@ -265,7 +265,7 @@ def monitoring_friday_talks():
     """
     one_minute_monitor = Timer(60.0, monitoring_friday_talks)
     one_minute_monitor.start()
-    now = get_time(1)
+    now = get_time(2)
     global FRIDAY_MODE
     if now.weekday() == 4:
         from_midnight = int(
