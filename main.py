@@ -174,13 +174,14 @@ def handle_text(message) -> None:
         )
         if score:
             score = int("".join(score))
-        faculty = [
-            _
-            for _ in message.text.split()
-            if _.lower().startswith(tuple(settings.FACULTY.keys()))
-        ]
+        faculty = []
+        for word in message.text.split():
+            for key in tuple(settings.FACULTY.keys()):
+                if word.lower().startswith(key):
+                    faculty.append(key)
+                    break
         if faculty:
-            faculty = settings.FACULTY[faculty[0][:5].lower()]
+            faculty = settings.FACULTY[faculty[0].lower()]
         if score and faculty:
             score = -score if minus else score
             answer = new_score_record(faculty, score, message.from_user.id)
