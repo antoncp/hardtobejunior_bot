@@ -174,6 +174,8 @@ def handle_text(message) -> None:
         )
         if score:
             score = int("".join(score))
+            if str(score) not in message.text.lower():
+                score = None
         faculty = []
         for word in message.text.split():
             for key in tuple(settings.FACULTY.keys()):
