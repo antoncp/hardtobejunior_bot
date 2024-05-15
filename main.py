@@ -165,8 +165,11 @@ def handle_text(message) -> None:
     Searches for record command from admin to add new scores record
     to one of the faculties.
     """
+    admin = is_admin(message)
     if (
-        message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID
+        message.from_user.id == ADMIN_ID
+        or message.from_user.id == INSPECT_ID
+        or admin
     ) and settings.START_WORLD in message.text.lower():
         score = [_ for _ in message.text if _.isdigit()]
         minus = (
@@ -224,10 +227,10 @@ def handle_text(message) -> None:
 def new_score_record(faculty: str, score: int, id: int) -> str:
     """Adds new scores record to the database."""
     db = DataBase()
-    if id == ADMIN_ID:
-        db.save_points(faculty, score)
-    else:
+    if id == INSPECT_ID:
         db.test_save_points(faculty, score)
+    else:
+        db.save_points(faculty, score)
     db.close()
     if score >= 0:
         answer = (
@@ -259,6 +262,14 @@ def read_records(id: int) -> str:
         ]
     )
     return header + answer_stat
+
+
+def is_admin(message):
+    """Check if user is a admin of the group"""
+    status = bot.get_chat_member(message.chat.id, message.from_user.id).status
+    if status == "creator" or status == "administrator":
+        return True
+    return False
 
 
 def monitoring_friday_talks():
