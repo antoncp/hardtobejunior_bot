@@ -103,16 +103,16 @@ def show_logs(message):
 def show_stat(message):
     """Shows statistic of score by faculty."""
     if message.chat.id == INSPECT_ID:
-        answer_stat = read_records(ADMIN_ID)
+        answer_stat = read_records()
         bot.send_message(message.chat.id, answer_stat, parse_mode="Markdown")
-        answer_stat = read_records(INSPECT_ID)
+        answer_stat = read_records(test=True)
         now = get_time(1)
         answer_stat = f'{now.strftime("%m/%d/%Y, %H:%M:%S")}\n\n' + answer_stat
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
         )
     else:
-        answer_stat = read_records(ADMIN_ID)
+        answer_stat = read_records()
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
         )
@@ -195,17 +195,10 @@ def handle_text(message) -> None:
             )
     elif (
         message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID
-    ) and message.text.lower() == "стата":
-        answer_stat = read_records(ADMIN_ID)
-        return bot.send_message(
-            message.chat.id, answer_stat, parse_mode="Markdown"
-        )
-    elif (
-        message.from_user.id == ADMIN_ID or message.from_user.id == INSPECT_ID
     ) and message.text.lower() == "тестстата":
         global FRIDAY_MODE
         FRIDAY_MODE = True
-        answer_stat = read_records(INSPECT_ID)
+        answer_stat = read_records(test=True)
         return bot.send_message(
             message.chat.id, answer_stat, parse_mode="Markdown"
         )
@@ -245,10 +238,10 @@ def new_score_record(faculty: str, score: int, id: int) -> str:
     return answer
 
 
-def read_records(id: int) -> str:
+def read_records(test: bool = False) -> str:
     """Fetch all scores statistic from the database."""
     db = DataBase()
-    if id == int(ADMIN_ID):
+    if not test:
         faculty_stat = db.get_all_points()
         header = "Статистика на данный момент:\n\n"
     else:
