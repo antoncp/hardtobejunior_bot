@@ -19,7 +19,7 @@ class Settings:
     API_PAS = os.environ.get("API_PAS")
     START_WORLD = "факульт"
     REDUCT_WORLD = "минус"
-    NUM_MESSAGES = 30
+    NUM_MESSAGES = 50
     FACULTY = {
         "мобил": "Мобилпафф",
         "фулст": "Фулстекслей",

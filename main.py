@@ -1,3 +1,4 @@
+import os
 from threading import Timer
 
 import telebot
@@ -121,22 +122,25 @@ def show_stat(message):
 @bot.message_handler(commands=["summ_1"])
 def summary(message):
     """Summarizes last 30 messages in the chat."""
-    if message.chat.type == "private" and message.from_user.id != INSPECT_ID:
+    if message.from_user.id != INSPECT_ID:
         return
     db = DataBase()
     messages = db.read_messages(settings.NUM_MESSAGES)
     db.close()
-    content = "<br><br>".join(
+    content = "; ".join(
         [
-            f"<b>{text[0]}:</b> {text[2]}"
+            f"{text[0]}: {text[2]}"
             if text[1] is None
-            else f"<b>{text[0]}, {text[1]}:</b> {text[2]}"
+            else f"{text[0]}, {text[1]}: {text[2]}"
             for text in reversed(messages)
         ]
     )
-    pre = "Последние 30 сообщений в этом чате в глазах бота:\n\n"
-    answer = send_conversation(content)
-    bot.send_message(message.chat.id, pre + answer)
+    file_path = "summary.txt"
+    with open(file_path, "w", encoding="utf-8") as file:
+        file.write(content)
+    with open(file_path, "rb") as file:
+        bot.send_document(message.chat.id, file)
+    os.remove(file_path)
 
 
 @bot.message_handler(commands=["summ_2"])
@@ -148,9 +152,9 @@ def sum_me(message):
     db.close()
     content = "<br><br>".join(
         [
-            f"<b>{text[0]}:</b> {text[2]}"
+            f"{text[0]}: {text[2]}"
             if text[1] is None
-            else f"<b>{text[0]}, {text[1]}:</b> {text[2]}"
+            else f"{text[0]}, {text[1]}: {text[2]}"
             for text in reversed(messages)
         ]
     )
