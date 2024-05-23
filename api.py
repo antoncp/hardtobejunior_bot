@@ -6,8 +6,11 @@ from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
+from groq import Groq
 
 from config import logger, settings
+
+client = Groq(api_key=settings.GROQ_API_KEY)
 
 
 def find_url(text):
@@ -96,3 +99,11 @@ def writing_message(message):
         )
     except Exception:
         logging.info(f"ОШИБКА ЗАПИСИ: {message.text[:45]}...")
+
+
+def summ_with_groq(messages):
+    message = [{"role": "user", "content": f"{settings.PROMPT}{messages}"}]
+    response = client.chat.completions.create(
+        model="llama3-8b-8192", messages=message, temperature=0
+    )
+    return response

@@ -3,7 +3,8 @@ from threading import Timer
 
 import telebot
 
-from api import find_url, read_url, send_conversation, writing_message
+from api import (find_url, read_url, send_conversation, summ_with_groq,
+                 writing_message)
 from config import logger, settings
 from db import DataBase
 from health_endpoint import flask_thread, shutdown_event
@@ -136,11 +137,17 @@ def summary(message):
         ]
     )
     file_path = "summary.txt"
+    pre_answer = summ_with_groq(content)
+    answer = (
+        f"{pre_answer.choices[0].message.content}\n\n"
+        "Tokens:{pre_answer.usage.total_tokens}"
+    )
     with open(file_path, "w", encoding="utf-8") as file:
         file.write(content)
     with open(file_path, "rb") as file:
         bot.send_document(message.chat.id, file)
     os.remove(file_path)
+    bot.send_message(message.chat.id, answer, parse_mode="Markdown")
 
 
 @bot.message_handler(commands=["summ_2"])
