@@ -122,7 +122,7 @@ def show_stat(message):
 
 @bot.message_handler(commands=["summ_1"])
 def summary(message):
-    """Summarizes last 30 messages in the chat."""
+    """Summarizes last n-messages in the chat."""
     if message.from_user.id != INSPECT_ID:
         return
     db = DataBase()
