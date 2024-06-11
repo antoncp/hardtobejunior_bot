@@ -139,7 +139,10 @@ def summary(message):
     )
     file_path = "summary.txt"
     pre_answer = summ_with_groq(content)
-    sys.stdout.write(pre_answer)
+    try:
+        sys.stdout.write(str(pre_answer))
+    except Exception as e:
+        sys.stdout.write(f"Write out failed {e}")
     answer = (
         f"{pre_answer.choices[0].message.content}\n\n"
         f"Tokens: {pre_answer.usage.total_tokens}"
