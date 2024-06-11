@@ -1,4 +1,5 @@
 import os
+import sys
 from threading import Timer
 
 import telebot
@@ -138,9 +139,10 @@ def summary(message):
     )
     file_path = "summary.txt"
     pre_answer = summ_with_groq(content)
+    sys.stdout.write(pre_answer)
     answer = (
         f"{pre_answer.choices[0].message.content}\n\n"
-        f"Tokens:{pre_answer.usage.total_tokens}"
+        f"Tokens: {pre_answer.usage.total_tokens}"
     )
     with open(file_path, "w", encoding="utf-8") as file:
         file.write(content)
