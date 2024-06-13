@@ -152,7 +152,7 @@ def summary(message):
     with open(file_path, "rb") as file:
         bot.send_document(message.chat.id, file)
     os.remove(file_path)
-    bot.send_message(message.chat.id, answer, parse_mode="Markdown")
+    bot.send_message(message.chat.id, answer)
 
 
 @bot.message_handler(commands=["summ_2"])
