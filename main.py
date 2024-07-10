@@ -328,7 +328,7 @@ if __name__ == "__main__":
     db.create_database()
     db.close()
     flask_thread.start()
-    monitoring_friday_talks()
+    # monitoring_friday_talks()
     try:
         bot.infinity_polling(timeout=10, long_polling_timeout=5)
     except Exception as e:
