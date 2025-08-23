@@ -1,0 +1,11 @@
+bug:
+  - "**/Bug/**"
+  - "**/*.bug"
+
+feature:
+  - "**/Feature/**"
+  - "**/*.feature"
+
+documentation:
+  - "**/docs/**"
+  - "**/*.md"

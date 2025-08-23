@@ -10,6 +10,9 @@ from config import logger, settings
 from db import DataBase
 from health_endpoint import flask_thread, shutdown_event
 from utilities import choose_noun_case, get_time
+from interview_scheduler import (initialize_questions_database, schedule_daily_questions, 
+                                get_question_statistics, post_daily_interview_question)
+from interview_questions import get_questions_by_category
 
 ADMIN_ID = settings.ADMIN_ID
 INSPECT_ID = settings.INSPECT_ID
@@ -22,6 +25,7 @@ bot.set_my_commands(
         telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
         telebot.types.BotCommand("/house_points", "Баллы факультетов"),
         telebot.types.BotCommand("/positions", "IT jobs in Netherlands"),
+        telebot.types.BotCommand("/interview", "Вопрос для собеседования"),
     ]
 )
 
@@ -31,6 +35,8 @@ bot.set_my_commands(
         telebot.types.BotCommand("/show_logs", "Показать логи"),
         telebot.types.BotCommand("/house_points", "Баллы факультетов"),
         telebot.types.BotCommand("/positions", "IT jobs in Netherlands"),
+        telebot.types.BotCommand("/interview", "Вопрос для собеседования"),
+        telebot.types.BotCommand("/interview_stats", "Статистика вопросов"),
     ],
     scope=telebot.types.BotCommandScopeChat(INSPECT_ID),
 )
@@ -42,6 +48,7 @@ if not settings.DEBUG:
                 telebot.types.BotCommand("/read_link", "Что там за ссылкой?"),
                 telebot.types.BotCommand("/house_points", "Баллы факультетов"),
                 telebot.types.BotCommand("/positions", "IT jobs in Netherlands"),
+                telebot.types.BotCommand("/interview", "Вопрос для собеседования"),
             ],
             scope=telebot.types.BotCommandScopeChat(ADMIN_ID),
         )
@@ -142,6 +149,111 @@ def get_positions(message):
         bot.send_message(
             message.chat.id,
             "❌ Sorry, there was an error fetching job positions. Please try again later.",
+            parse_mode="Markdown"
+        )
+
+
+@bot.message_handler(commands=["interview"])
+def get_interview_question(message):
+    """Gets a random interview question for practice."""
+    try:
+        # Parse optional category from command
+        text_parts = message.text.split()
+        category = None
+        
+        if len(text_parts) > 1:
+            category_map = {
+                "behavioral": "behavioral",
+                "поведенческий": "behavioral", 
+                "soft": "soft_skill",
+                "навыки": "soft_skill",
+                "culture": "culture_fit",
+                "культура": "culture_fit",
+                "it": "it_specific",
+                "ит": "it_specific"
+            }
+            category = category_map.get(text_parts[1].lower())
+        
+        db = DataBase()
+        question_data = db.get_random_unused_question(category)
+        
+        if not question_data:
+            # If no unused questions, get any random question
+            if category:
+                # For specific category, get random from that category
+                questions = get_questions_by_category(category)
+                if questions:
+                    import random
+                    question_text = random.choice(questions)
+                    category_display = category
+                else:
+                    question_text = "Не найдено вопросов для данной категории."
+                    category_display = category
+            else:
+                # Reset all and try again
+                db.reset_all_questions()
+                question_data = db.get_random_unused_question()
+                if question_data:
+                    _, category_display, question_text = question_data
+                else:
+                    question_text = "Не удалось получить вопрос для собеседования."
+                    category_display = "unknown"
+        else:
+            question_id, category_display, question_text = question_data
+            # Don't mark as used for manual requests, only for daily posts
+            
+        db.close()
+        
+        # Format message
+        category_emoji = {
+            "behavioral": "🧠",
+            "soft_skill": "💪", 
+            "culture_fit": "🏢",
+            "it_specific": "💻"
+        }
+        
+        category_names = {
+            "behavioral": "Поведенческий",
+            "soft_skill": "Навыки", 
+            "culture_fit": "Культура компании",
+            "it_specific": "IT-специфичный"
+        }
+        
+        emoji = category_emoji.get(category_display, "❓")
+        category_name = category_names.get(category_display, category_display.title())
+        
+        response = f"Вопрос для собеседования: {question_text} {emoji} Подумай и потренируйся отвечать вслух!\n\n"
+        response += "📝 *Доступные категории: behavioral, soft, culture, it*"
+        
+        bot.send_message(message.chat.id, response, parse_mode="Markdown")
+        
+    except Exception as e:
+        logger.error(f"Error in interview command: {e}")
+        bot.send_message(
+            message.chat.id,
+            "❌ Произошла ошибка при получении вопроса. Попробуйте позже.",
+            parse_mode="Markdown"
+        )
+
+
+@bot.message_handler(commands=["interview_stats"])
+def get_interview_stats(message):
+    """Shows interview question statistics (admin only)."""
+    if message.from_user.id == INSPECT_ID or message.from_user.id == ADMIN_ID:
+        try:
+            stats_message = get_question_statistics()
+            bot.send_message(message.chat.id, stats_message, parse_mode="Markdown")
+        except Exception as e:
+            logger.error(f"Error getting interview stats: {e}")
+            bot.send_message(
+                message.chat.id,
+                "❌ Ошибка при получении статистики.",
+                parse_mode="Markdown"
+            )
+    else:
+        bot.send_message(
+            message.chat.id,
+            "❌ Эта команда доступна только администраторам.",
             parse_mode="Markdown"
         )
 
@@ -349,10 +461,20 @@ def monitoring_friday_talks():
 
 
 if __name__ == "__main__":
+    # Initialize database
     db = DataBase()
     db.create_database()
     db.close()
+    
+    # Initialize interview questions
+    initialize_questions_database()
+    
+    # Start background services
     flask_thread.start()
+    
+    # Start interview question scheduler
+    schedule_daily_questions(bot)
+    
     # monitoring_friday_talks()
     try:
         bot.infinity_polling(timeout=10, long_polling_timeout=5)
