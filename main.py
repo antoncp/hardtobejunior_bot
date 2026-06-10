@@ -10,8 +10,8 @@ from config import logger, settings
 from db import DataBase
 from health_endpoint import flask_thread, shutdown_event
 from utilities import choose_noun_case, get_time
-from interview_scheduler import (initialize_questions_database, schedule_daily_questions, 
-                                get_question_statistics, post_daily_interview_question)
+from interview_scheduler import (initialize_questions_database,
+                                get_question_statistics)
 from interview_questions import get_questions_by_category
 
 ADMIN_ID = settings.ADMIN_ID
@@ -471,10 +471,7 @@ if __name__ == "__main__":
     
     # Start background services
     flask_thread.start()
-    
-    # Start interview question scheduler
-    schedule_daily_questions(bot)
-    
+
     # monitoring_friday_talks()
     try:
         bot.infinity_polling(timeout=10, long_polling_timeout=5)
